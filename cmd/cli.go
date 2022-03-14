@@ -3,8 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/gohouse/converter"
 	"log"
+
+	"github.com/gohouse/converter"
 )
 
 func main() {
@@ -12,20 +13,21 @@ func main() {
 }
 
 func parser() {
-	dsn := flag.String("dsn", "", "数据库dsn配置")
-	file := flag.String("file", "", "保存路径")
-	table := flag.String("table", "", "要迁移的表")
-	realNameMethod := flag.String("realNameMethod", "", "结构体对应的表名")
-	packageName := flag.String("packageName", "model", "生成的struct包名")
-	tagKey := flag.String("tagKey", "orm", "字段tag的key")
-	prefix := flag.String("prefix", "", "表前缀")
-	version := flag.Bool("version", false, "版本号")
-	v := flag.Bool("v", false, "版本号")
-	enableJsonTag := flag.Bool("enableJsonTag", false, "是否添加json的tag,默认false")
-	h := flag.Bool("h", false, "帮助")
-	help := flag.Bool("help", false, "帮助")
+	dsn := flag.String("dsn", "", "database dsn configuration")
+	file := flag.String("file", "", "save route")
+	table := flag.String("table", "", "table to migrate")
+	realNameMethod := flag.String("realNameMethod", "", "The table name corresponding to the structure")
+	dateToTime := flag.Bool("dateToTime", true, "Whether to convert date to Time, default true")
+	packageName := flag.String("packageName", "model", "Generated struct package name")
+	tagKey := flag.String("tagKey", "orm", "the key of the field tag")
+	prefix := flag.String("prefix", "", "table prefix")
+	version := flag.Bool("version", false, "version number")
+	v := flag.Bool("v", false, "version number")
+	enableJsonTag := flag.Bool("enableJsonTag", false, "Whether to add json tag, default false")
+	h := flag.Bool("h", false, "help")
+	help := flag.Bool("help", false, "help")
 
-	// 开始
+	// start
 	flag.Parse()
 
 	if *h || *help {
@@ -33,45 +35,46 @@ func parser() {
 		return
 	}
 
-	// 版本号
+	// version number
 	if *version || *v {
-		fmt.Println(fmt.Sprintf("\n version: %s\n %s\n using -h param for more help \n",
-			converter.VERSION, converter.VERSION_TEXT))
+		fmt.Printf("\n version: %s\n %s\n using -h param for more help \n", converter.VERSION, converter.VERSION_TEXT)
 		return
 	}
 
-	// 初始化
+	// initialization
 	t2t := converter.NewTable2Struct()
-	// 个性化配置
+	// personalized configuration
 	t2t.Config(&converter.T2tConfig{
-		// 如果字段首字母本来就是大写, 就不添加tag, 默认false添加, true不添加
+		// If the first letter of the field is originally capitalized, the tag will not be added. By default, false is added, and true is not added.
 		RmTagIfUcFirsted: false,
-		// tag的字段名字是否转换为小写, 如果本身有大写字母的话, 默认false不转
+		// Whether the field name of the tag is converted to lowercase, if it has uppercase letters, the default false is not converted
 		TagToLower: false,
-		// 字段首字母大写的同时, 是否要把其他字母转换为小写,默认false不转换
+		// When the first letter of the field is capitalized, whether to convert other letters to lowercase, the default false is not converted
 		UcFirstOnly: false,
-		//// 每个struct放入单独的文件,默认false,放入同一个文件(暂未提供)
+		//// Put each struct into a separate file, the default is false, put into the same file (not provided yet)
 		//SeperatFile: false,
 	})
-	// 开始迁移转换
+	// Start migration
 	err := t2t.
-		// 指定某个表,如果不指定,则默认全部表都迁移
+		// Specify a table, if not specified, all tables will be migrated by default
 		Table(*table).
-		// 表前缀
+		// table prefix
 		Prefix(*prefix).
-		// 是否添加json tag
+		// Whether to add json tag
 		EnableJsonTag(*enableJsonTag).
-		// 生成struct的包名(默认为空的话, 则取名为: package model)
+		// The package name of the generated struct (if it is empty by default, it will be named: package model)
 		PackageName(*packageName).
-		// tag字段的key值,默认是orm
+		// The key value of the tag field, the default is orm
 		TagKey(*tagKey).
-		// 是否添加结构体方法获取表名
+		// Whether to add a structure method to get the table name
 		RealNameMethod(*realNameMethod).
-		// 生成的结构体保存路径
+		// Generated structure save path
 		SavePath(*file).
-		// 数据库dsn
+		// database dsn
 		Dsn(*dsn).
-		// 执行
+		// use time for sql date
+		DateToTime(*dateToTime).
+		// and run
 		Run()
 
 	if err != nil {
